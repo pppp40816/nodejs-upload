@@ -1,0 +1,55 @@
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    //formdata
+    async function submitFile(e) {
+        const formData = new FormData(document.getElementById('uploadForm'))
+        console.log(formData);
+        const response = await axios({
+            method: 'post',
+            url: 'http://localhost:3000/model/upload',
+            data: formData,
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+            },
+        })
+            .then(function (response) {
+                console.log(response);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        return false;
+    }
+    //body
+    function handleFileDrop(files) {
+        const reader = new FileReader();
+        let fileName = files[0].name;
+        reader.readAsBinaryString(files[0]);
+        reader.onload = (readerEvt) => {
+            const fileData = btoa(reader.result);
+            const response = axios({
+                method: 'post',
+                url: 'http://localhost:3000/model/binary',
+                data: fileData,
+                headers: {
+                    'Content-Type': `text/plain`,
+                },
+                params: { fileName }
+            })
+                .then(function (result) {
+                    console.log(result);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+</script>
+<form id="uploadForm" enctype="multipart/form-data" onsubmit="return false;">
+    <p>
+        <label>
+            <input type="file" name="model_file" required
+                onchange="handleFileDrop(event.target.files);this.form.reset()" />
+        </label>
+    </p>
+</form>
